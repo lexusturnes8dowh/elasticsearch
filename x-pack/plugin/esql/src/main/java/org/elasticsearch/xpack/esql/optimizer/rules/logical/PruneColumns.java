@@ -29,6 +29,7 @@ import org.elasticsearch.xpack.esql.plan.logical.Sample;
 import org.elasticsearch.xpack.esql.plan.logical.UnaryPlan;
 import org.elasticsearch.xpack.esql.plan.logical.UnionAll;
 import org.elasticsearch.xpack.esql.plan.logical.join.InlineJoin;
+import org.elasticsearch.xpack.esql.plan.logical.join.StubRelation;
 import org.elasticsearch.xpack.esql.plan.logical.local.LocalRelation;
 import org.elasticsearch.xpack.esql.plan.logical.local.LocalSupplier;
 import org.elasticsearch.xpack.esql.planner.PlannerUtils;
@@ -72,12 +73,13 @@ public final class PruneColumns extends Rule<LogicalPlan, LogicalPlan> {
             do {
                 recheck.set(false);
                 p = switch (p) {
-                    case Aggregate agg -> pruneColumnsInAggregate(agg, used, inlineJoin);
+                    case Aggregate agg -> pruneColumnsInAggregate(agg, used, inlineJoin, recheck);
                     case InlineJoin inj -> pruneColumnsInInlineJoin(inj, used, recheck);
                     case Eval eval -> pruneColumnsInEval(eval, used, recheck);
                     case Project project -> pruneColumnsInProject(project, used, recheck);
                     case EsRelation esr -> pruneColumnsInEsRelation(esr, used);
                     case ExternalRelation ext -> pruneColumnsInExternalRelation(ext, used);
+                    case StubRelation stubRelation -> pruneColumnsInStubRelation(stubRelation, used);
                     case Fork fork -> {
                         // Skip descending into the Fork subtree: a true Fork handles its subplans internally in
                         // pruneColumnsInFork, while UnionAll is left untouched. Using skipBranch (instead of a sticky
@@ -98,7 +100,12 @@ public final class PruneColumns extends Rule<LogicalPlan, LogicalPlan> {
         });
     }
 
-    private static LogicalPlan pruneColumnsInAggregate(Aggregate aggregate, AttributeSet.Builder used, boolean inlineJoin) {
+    private static LogicalPlan pruneColumnsInAggregate(
+        Aggregate aggregate,
+        AttributeSet.Builder used,
+        boolean inlineJoin,
+        Holder<Boolean> recheck
+    ) {
         LogicalPlan p = aggregate;
         var remaining = pruneUnusedAndAddReferences(aggregate.aggregates(), used);
 
@@ -109,6 +116,7 @@ public final class PruneColumns extends Rule<LogicalPlan, LogicalPlan> {
             if (inlineJoin) {
                 // all aggregates are pruned, delegate to child plan
                 p = aggregate.child();
+                recheck.set(true);
             } else if (aggregate.groupings().isEmpty()) {
                 // We still need to have a plan that produces 1 row per group.
                 p = new LocalRelation(
@@ -129,6 +137,7 @@ public final class PruneColumns extends Rule<LogicalPlan, LogicalPlan> {
                 // already part of the IJ output (from the left-hand side): the agg can just be dropped entirely.
                 if (aggregate.groupings().containsAll(remaining)) {
                     p = aggregate.child();
+                    recheck.set(true);
                 }
                 // TODO: deal with prunning partial groupings in InlineJoin right side
             } else { // not an INLINEJOIN or there are actually aggregates to compute
@@ -217,6 +226,13 @@ public final class PruneColumns extends Rule<LogicalPlan, LogicalPlan> {
     private static LogicalPlan pruneColumnsInExternalRelation(ExternalRelation ext, AttributeSet.Builder used) {
         var remaining = pruneUnusedAndAddReferences(ext.output(), used);
         return remaining != null ? ext.withAttributes(remaining) : ext;
+    }
+
+    private static LogicalPlan pruneColumnsInStubRelation(StubRelation stubRelation, AttributeSet.Builder used) {
+        var remaining = pruneUnusedAndAddReferences(stubRelation.output(), used);
+        return remaining != null
+            ? new StubRelation(stubRelation.source(), remaining.stream().map(Expressions::attribute).toList())
+            : stubRelation;
     }
 
     // TODO: see ResolveUnmapped#patchFork comment
