@@ -53,5 +53,4 @@ In this preview the `help` field is always an empty string. Help text from metri
 
 ## Exemplar queries (HTTP API) [promql-limitations-exemplars]
 
-`/api/v1/query_exemplars` is not implemented yet.
-Turn off exemplar queries in your Prometheus-compatible client for now (for example, the Grafana data source exemplars option) so it does not call that endpoint.
+`/api/v1/query_exemplars` is not implemented yet, so exemplar queries are not supported.

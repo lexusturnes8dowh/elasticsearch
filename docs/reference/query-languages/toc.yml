@@ -419,6 +419,7 @@ toc:
   - file: promql.md
     children:
       - file: promql/promql-http-api.md
+      - file: promql/promql-grafana.md
       - file: promql/promql-limitations.md
   - file: sql.md
     children:
