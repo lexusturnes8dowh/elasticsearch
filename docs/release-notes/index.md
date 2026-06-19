@@ -20,6 +20,118 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [elasticsearch-next-fixes]
 % *
 
+## 9.4.3 [elasticsearch-9.4.3-release-notes]
+```{applies_to}
+stack: ga 9.4.3
+```
+
+### Features and enhancements [elasticsearch-9.4.3-features-enhancements]
+
+Authorization:
+* [Axonius] Replace the axonius.alert_and_incident index with the axonius.alert_finding and axonius.incident indices to `manage`, `create_index`, `read`, `index`, `write`, `delete`, permission for third party agent indices `kibana_system` [#149797](https://github.com/elastic/elasticsearch/pull/149797)
+
+Data streams:
+* [otel-data] Explicitly map `http.response.status_code` as long [#149631](https://github.com/elastic/elasticsearch/pull/149631)
+
+ES|QL:
+* Add filter capture for ESQL query [#149535](https://github.com/elastic/elasticsearch/pull/149535)
+
+Inference:
+* Upgrading commons-lang3 version for inference plugin [#150242](https://github.com/elastic/elasticsearch/pull/150242)
+
+Infra/Logging:
+* Add query filter logging to SQL and EQL queries [#150127](https://github.com/elastic/elasticsearch/pull/150127)
+
+Machine Learning:
+* Add EuroBERT and Jina v5 ops to graph validation allowlist [#3015](https://github.com/elastic/ml-cpp/pull/3015)
+* Better error handling regarding quantiles state documents [#2894](https://github.com/elastic/ml-cpp/pull/2894)
+* Better handling of invalid JSON state documents [#2895](https://github.com/elastic/ml-cpp/pull/2895)
+* Better messaging regarding OOM process termination [#2841](https://github.com/elastic/ml-cpp/pull/2841)
+* Downgrade log severity for a batch of recoverable errors [#2889](https://github.com/elastic/ml-cpp/pull/2889)
+* Harden pytorch_inference with TorchScript model graph validation [#3008](https://github.com/elastic/ml-cpp/pull/3008) (issue: [#2890](https://github.com/elastic/ml-cpp/issues/2890))
+* Improve adherence to memory limits for the bucket gatherer [#2848](https://github.com/elastic/ml-cpp/pull/2848)
+* Report the actual memory usage of the autodetect process [#2846](https://github.com/elastic/ml-cpp/pull/2846)
+* Restrict file system access for pytorch models [#2851](https://github.com/elastic/ml-cpp/pull/2851)
+* Update the PyTorch library to version 2.7.1 [#2863](https://github.com/elastic/ml-cpp/pull/2863)
+
+Network:
+* Upgrade netty to 4.1.135.Final [#151099](https://github.com/elastic/elasticsearch/pull/151099)
+
+Security:
+* Optimize literal action automaton builds [#151093](https://github.com/elastic/elasticsearch/pull/151093) (issues: [#123872](https://github.com/elastic/elasticsearch/issues/123872), [#105723](https://github.com/elastic/elasticsearch/issues/105723))
+
+
+### Fixes [elasticsearch-9.4.3-fixes]
+
+Aggregations:
+* Fix AVLTreeDigest CDF monotonicity for penultimate centroid [#151181](https://github.com/elastic/elasticsearch/pull/151181) (issue: [#151012](https://github.com/elastic/elasticsearch/issues/151012))
+
+Analysis:
+* Fix Nynorsk stemmer `UnsupportedOperationException`. The `light_nynorsk` and `minimal_nynorsk` stemmers no longer fail with an HTTP 500 error during index creation due to passing an immutable map to Lucene's analysis factory. [#150345](https://github.com/elastic/elasticsearch/pull/150345)
+
+Authentication:
+* Move SAML metadata resolution to background thread [#144381](https://github.com/elastic/elasticsearch/pull/144381) (issue: [#138031](https://github.com/elastic/elasticsearch/issues/138031))
+
+ES|QL:
+* Avoid long overflows on AVG by casting to double [#148519](https://github.com/elastic/elasticsearch/pull/148519) (issue: [#99575](https://github.com/elastic/elasticsearch/issues/99575))
+* Carry over synthetic attributes from conversions to the `Project` above `UnionAll` [#149775](https://github.com/elastic/elasticsearch/pull/149775) (issue: [#149509](https://github.com/elastic/elasticsearch/issues/149509))
+* Catch `StackOverflowError` in deeply nested RLIKE patterns [#150238](https://github.com/elastic/elasticsearch/pull/150238) (issue: [#149838](https://github.com/elastic/elasticsearch/issues/149838))
+* Enforce limit for max nested functions [#149971](https://github.com/elastic/elasticsearch/pull/149971)
+* Fix subquery/fork with inline stats pruning [#149783](https://github.com/elastic/elasticsearch/pull/149783) (issue: [#149589](https://github.com/elastic/elasticsearch/issues/149589))
+* Fix wildcard view resolution losing duplicate copies [#149418](https://github.com/elastic/elasticsearch/pull/149418) (issue: [#149416](https://github.com/elastic/elasticsearch/issues/149416))
+* Fixes wrong warning in expressions with unrolled multivalues [#145968](https://github.com/elastic/elasticsearch/pull/145968)
+* Make subquery with counter type not present in all branches behave more consistently [#150704](https://github.com/elastic/elasticsearch/pull/150704) (issues: [#150640](https://github.com/elastic/elasticsearch/issues/150640), [#150641](https://github.com/elastic/elasticsearch/issues/150641), [#150644](https://github.com/elastic/elasticsearch/issues/150644), [#150645](https://github.com/elastic/elasticsearch/issues/150645))
+
+ILM:
+* Truncate error for ILM's `step_info` instead of string [#150413](https://github.com/elastic/elasticsearch/pull/150413)
+
+Inference:
+* Validate inference embedding model before checking for existing uses [#150150](https://github.com/elastic/elasticsearch/pull/150150) (issues: [#147062](https://github.com/elastic/elasticsearch/issues/147062), [#150084](https://github.com/elastic/elasticsearch/issues/150084))
+* When a streaming inference request is canceled, immediately release apache client networking resources [#149987](https://github.com/elastic/elasticsearch/pull/149987)
+* [Inference API] Fix Streaming publisher shutdown race condition [#150789](https://github.com/elastic/elasticsearch/pull/150789) (issue: [#150742](https://github.com/elastic/elasticsearch/issues/150742))
+
+Infra/Core:
+* Don't apply time zones to epoch-based timestamps [#148663](https://github.com/elastic/elasticsearch/pull/148663)
+* Filter `_source` field names by code point [#151146](https://github.com/elastic/elasticsearch/pull/151146)
+* Fix OS stats for cgroup paths containing colons [#151095](https://github.com/elastic/elasticsearch/pull/151095)
+
+Machine Learning:
+* Add extra validation in `trained_model` creation [#150227](https://github.com/elastic/elasticsearch/pull/150227)
+* Fix flaky CIoManagerTest/testFileIoGood test [#3017](https://github.com/elastic/ml-cpp/pull/3017)
+
+Mapping:
+* Don't allow runtime fields to shadow fields used in index sort [#150636](https://github.com/elastic/elasticsearch/pull/150636) (issue: [#149500](https://github.com/elastic/elasticsearch/issues/149500))
+
+Query Languages:
+* EQL/SQL: enforce max expression depth checks [#150003](https://github.com/elastic/elasticsearch/pull/150003)
+
+Reindex:
+* Fix division of `max_docs` between slices in reindex [#150808](https://github.com/elastic/elasticsearch/pull/150808)
+
+SQL:
+* Fix CLI tests failures due to unconsumed output [#145967](https://github.com/elastic/elasticsearch/pull/145967) (issues: [#143646](https://github.com/elastic/elasticsearch/issues/143646), [#143645](https://github.com/elastic/elasticsearch/issues/143645))
+
+Search:
+* Add IT covering search during rolling restart [#149667](https://github.com/elastic/elasticsearch/pull/149667) (issue: [#86927](https://github.com/elastic/elasticsearch/issues/86927))
+* Guard against null zeroTermsQuery in cross_fields multi_match [#149935](https://github.com/elastic/elasticsearch/pull/149935) (issue: [#149934](https://github.com/elastic/elasticsearch/issues/149934))
+* Ids Query: Throw `IllegalArgumentException` [#151234](https://github.com/elastic/elasticsearch/pull/151234) (issue: [#150305](https://github.com/elastic/elasticsearch/issues/150305))
+
+Security:
+* Make Automatons wildcard code-point aware [#151143](https://github.com/elastic/elasticsearch/pull/151143)
+* Run remote child task cancellation as system user [#150560](https://github.com/elastic/elasticsearch/pull/150560)
+
+TSDB:
+* Fix OTLP histogram handling for single-count histograms without bucket boundaries [#151411](https://github.com/elastic/elasticsearch/pull/151411)
+* Fix prefix escape for synthetic id [#150433](https://github.com/elastic/elasticsearch/pull/150433) (issue: [#150389](https://github.com/elastic/elasticsearch/issues/150389))
+
+Transform:
+* Honor `ClusterHealth` timeout when waiting for transform internal index shards [#149462](https://github.com/elastic/elasticsearch/pull/149462) (issue: [#149400](https://github.com/elastic/elasticsearch/issues/149400))
+
+Vector Search:
+* Fix GPU SQ format name to match CPU equivalent [#149512](https://github.com/elastic/elasticsearch/pull/149512) (issue: [#148975](https://github.com/elastic/elasticsearch/issues/148975))
+
+
+
 ## 9.4.2 [elasticsearch-9.4.2-release-notes]
 
 ### Features and enhancements [elasticsearch-9.4.2-features-enhancements]
